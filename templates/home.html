@@ -123,8 +123,8 @@
     <div class="card">
       <h2 style="margin-top:0;">Know someone else?</h2>
       <p class="muted">Give them this join code to allow them to sign up - {{ joincode }}</p>
-      <a class="btn" href="/video" style="display:inline-block;">Go to Video tool →</a>
-    </div>
+      <button id="copyBtn" class="btn" style="display:inline-block;" data-code="{{ joincode }}">Copy join code</button>
+    </div><br>
 
     <div class="card" style="margin-bottom:1.5rem;">
       <h2 style="margin-top:0;">Your revision timetable</h2>
@@ -193,5 +193,17 @@
     </div>
   </div>
 </body>
+<script>
+  document.getElementById('copyBtn').addEventListener('click', async (e) => {
+    const code = e.target.dataset.code;
+    try {
+      await navigator.clipboard.writeText(code);
+      e.target.textContent = 'Copied!';
+      setTimeout(() => { e.target.textContent = 'Copy join code'; }, 1500);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
+  });
+</script>
 
 </html>
