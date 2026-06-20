@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Brain Wave - Exam Timetable</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .upload-box {
+      border: 2px dashed #c4b5fd;
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      background: #fbfaff;
+    }
+
+    .upload-box:hover {
+      border-color: var(--purple);
+    }
+
+    .upload-box img {
+      max-width: 100%;
+      max-height: 260px;
+      border-radius: var(--radius-md);
+      margin-top: 1rem;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .exam-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+    }
+
+    .exam-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #fbfaff;
+      border: 2px solid #e3defc;
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.1rem;
+    }
+
+    .exam-row .subj {
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .exam-row .when {
+      color: var(--muted);
+      font-size: 0.9rem;
+      width: 160px;
+    }
+
+    .comfort-pills {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .pill {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid #e3defc;
+      background: white;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .pill.selected {
+      background: var(--gradient);
+      color: white;
+      border-color: transparent;
+    }
+
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      background: #fbfaff;
+      border: 2px solid #e3defc;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .settings-row label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .settings-row input,
+    .settings-row select {
+      padding: 0.5rem 0.6rem;
+      border-radius: var(--radius-sm, 8px);
+      border: 2px solid #e3defc;
+      font-size: 0.9rem;
+    }
+
+    .tt-wrap {
+      overflow-x: auto;
+    }
+
+    .tt-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 600px;
+    }
+
+    .tt-day {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      align-items: stretch;
+      gap: 1rem;
+      background: #fbfaff;
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.1rem;
+      border: 2px solid #e3defc;
+    }
+
+    .tt-day.exam-day {
+      border-color: var(--purple);
+      background: #f5f0ff;
+    }
+
+    .tt-date {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .tt-date .wd {
+      font-weight: 700;
+    }
+
+    .tt-date .d {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .tt-sessions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .session-chip {
+      background: var(--gradient);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .session-chip .time {
+      opacity: 0.85;
+      font-weight: 500;
+      margin-right: 0.35rem;
+    }
+
+    .exam-chip {
+      background: white;
+      color: var(--purple-dark);
+      border: 2px solid var(--purple);
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .tt-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+
+    .tt-actions .btn-secondary {
+      background: #f1eefe;
+      color: var(--purple-dark);
+    }
+
+    .updated-note {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    #loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem 0;
+      display: none;
+    }
+
+    .error {
+      color: #dc2626;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  {% include "_nav.html" %}
+  <div class="page" style="padding-top: 1rem;">
+
+    {% if not has_key %}
+    <div class="card" style="margin-bottom:1.5rem; border: 2px dashed #c4b5fd;">
+      Add your Gemini API key in <a href="/settings" style="color:#6d28d9; font-weight:600;">Settings</a> first - it's
+      used only to read the text off your timetable image.
+    </div>
+    {% endif %}
+
+    <div class="error" id="error"></div>
+
+    <div class="card step active" id="step1">
+      <h2 style="margin-top:0;">1. Upload your exam timetable</h2>
+      <p class="muted">Upload a photo or screenshot of your exam schedule. Highlight your exams so we know what you are
+        doing.</p>
+      <div class="upload-box" id="uploadBox">
+        <div id="uploadPrompt">Click to choose an image</div>
+        <img id="preview" style="display:none;">
+      </div>
+      <input type="file" id="fileInput" accept="image/*">
+      <button id="extractBtn" style="margin-top:1.25rem;" disabled>Read timetable</button>
+      <div id="loading">Reading your timetable…</div>
+    </div>
+
+    <div class="card step" id="step2">
+      <h2 style="margin-top:0;">2. How comfortable are you with each subject?</h2>
+      <p class="muted">1 = need lots of revision, 5 = very comfortable. Subjects you're less comfortable with get more
+        revision sessions.</p>
+      <p class="muted">Use YYYY-MM-DD for dates if you need to fix anything.</p>
+      <div class="exam-list" id="examList"></div>
+
+      <div class="settings-row">
+        <label>Daily start time
+          <input type="time" id="startTimeInput" value="16:00">
+        </label>
+        <label>Session length
+          <select id="sessionLengthInput">
+            <option value="30">30 min</option>
+            <option value="45" selected>45 min</option>
+            <option value="60">60 min</option>
+            <option value="90">90 min</option>
+          </select>
+        </label>
+        <label>Break between sessions
+          <select id="breakLengthInput">
+            <option value="5">5 min</option>
+            <option value="10">10 min</option>
+            <option value="15" selected>15 min</option>
+            <option value="20">20 min</option>
+          </select>
+        </label>
+        <label>Sessions per day
+          <select id="sessionsPerDayInput">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="generateBtn">Generate revision timetable</button>
+    </div>
+
+    <div class="card step" id="step3">
+      <h2 style="margin-top:0;">Your revision timetable</h2>
+      <div class="updated-note" id="updatedNote"></div>
+      <div class="tt-wrap">
+        <div class="tt-grid" id="ttGrid"></div>
+      </div>
+      <div class="tt-actions">
+        <a class="btn" id="downloadBtn" href="/api/download-timetable.ics">⬇ Download calendar (.ics)</a>
+        <button id="restartBtn" class="btn-secondary">Generate a new one</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let examsData = [];
+    let comfortMap = {};
+    let imageFile = null;
+
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadBox.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      imageFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('preview').src = e.target.result;
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('uploadPrompt').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+      document.getElementById('extractBtn').disabled = false;
+    });
+
+    document.getElementById('extractBtn').addEventListener('click', async () => {
+      if (!imageFile) return;
+      document.getElementById('error').textContent = '';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('extractBtn').disabled = true;
+
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      try {
+        const res = await fetch('/api/extract-exams', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!res.ok) {
+          document.getElementById('error').textContent = data.error || 'Could not read the image.';
+          return;
+        }
+        examsData = data.exams || [];
+        if (examsData.length === 0) {
+          document.getElementById('error').textContent = 'No exams found in that image - try a clearer photo.';
+          return;
+        }
+        renderComfortStep();
+        goToStep(2);
+      } catch (e) {
+        document.getElementById('error').textContent = 'Network error: ' + e.message;
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('extractBtn').disabled = false;
+      }
+    });
+
+    function renderComfortStep() {
+      const list = document.getElementById('examList');
+      list.innerHTML = '';
+      examsData.forEach(exam => {
+        if (!(exam.subject in comfortMap)) comfortMap[exam.subject] = 3;
+        const selectedVal = comfortMap[exam.subject];
+        const row = document.createElement('div');
+        row.className = 'exam-row';
+        row.innerHTML = `
+      <div class="subj">${exam.subject}</div>
+      <input type="text" class="when-input" data-subject="${exam.subject}" value="${exam.date}" style="width:140px; padding:0.4rem 0.6rem; font-size:0.85rem;">
+      <div class="comfort-pills">
+        ${[1, 2, 3, 4, 5].map(n => `<div class="pill ${n === selectedVal ? 'selected' : ''}" data-subject="${exam.subject}" data-val="${n}">${n}</div>`).join('')}
+      </div>
+    `;
+        list.appendChild(row);
+      });
+
+      list.querySelectorAll('.when-input').forEach(input => {
+        input.addEventListener('change', () => {
+          const subject = input.dataset.subject;
+          const exam = examsData.find(e => e.subject === subject);
+          if (exam) exam.date = input.value.trim();
+        });
+      });
+
+      list.querySelectorAll('.pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          const subject = pill.dataset.subject;
+          const val = parseInt(pill.dataset.val);
+          comfortMap[subject] = val;
+          list.querySelectorAll(`.pill[data-subject="${subject}"]`).forEach(p => p.classList.remove('selected'));
+          pill.classList.add('selected');
+        });
+      });
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      document.getElementById('error').textContent = '';
+      try {
+        const res = await fetch('/api/generate-timetable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exams: examsData,
+            comfort: comfortMap,
+            start_time: document.getElementById('startTimeInput').value || '16:00',
+            session_minutes: parseInt(document.getElementById('sessionLengthInput').value),
+            break_minutes: parseInt(document.getElementById('breakLengthInput').value),
+            sessions_per_day: parseInt(document.getElementById('sessionsPerDayInput').value),
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          document.getElementById('error').textContent = data.error || 'Could not generate timetable.';
+          return;
+        }
+        if (!data.days || data.days.length === 0) {
+          document.getElementById('error').textContent = 'Could not build a timetable from those dates - please check the dates above are correct.';
+          return;
+        }
+        renderTimetable(data, 'Just now');
+        goToStep(3);
+      } catch (e) {
+        document.getElementById('error').textContent = 'Network error: ' + e.message;
+      }
+    });
+
+    function renderTimetable(data, updatedLabel) {
+      document.getElementById('updatedNote').textContent = updatedLabel ? `Last generated: ${updatedLabel}` : '';
+      const grid = document.getElementById('ttGrid');
+      grid.innerHTML = '';
+      data.days.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'tt-day' + (day.exam_today.length ? ' exam-day' : '');
+        const dateObj = new Date(day.date + 'T00:00:00');
+        const dateLabel = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+        let sessionsHtml = '';
+        day.sessions.forEach(s => {
+          if (typeof s === 'string') {
+            sessionsHtml += `<div class="session-chip">${s}</div>`;
+          } else {
+            sessionsHtml += `<div class="session-chip"><span class="time">${s.start}–${s.end}</span>${s.subject}</div>`;
+          }
+        });
+        day.exam_today.forEach(s => sessionsHtml += `<div class="exam-chip">Exam: ${s}</div>`);
+        if (!sessionsHtml) sessionsHtml = '<span class="muted">Rest day</span>';
+
+        div.innerHTML = `
+      <div class="tt-date"><div class="wd">${day.weekday}</div><div class="d">${dateLabel}</div></div>
+      <div class="tt-sessions">${sessionsHtml}</div>
+    `;
+        grid.appendChild(div);
+      });
+    }
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      imageFile = null;
+      examsData = [];
+      comfortMap = {};
+      document.getElementById('preview').style.display = 'none';
+      document.getElementById('uploadPrompt').style.display = 'block';
+      document.getElementById('fileInput').value = '';
+      document.getElementById('extractBtn').disabled = true;
+      goToStep(1);
+    });
+
+    function goToStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + n).classList.add('active');
+    }
+
+    (async function loadSavedTimetable() {
+      try {
+        const res = await fetch('/api/my-timetable');
+        const data = await res.json();
+        if (data.timetable && data.timetable.days && data.timetable.days.length) {
+          examsData = data.timetable.exams || [];
+          renderTimetable(data.timetable, data.updated || '');
+          goToStep(3);
+        }
+      } catch (e) {
+      }
+    })();
+  </script>
+</body>
+
+</html>

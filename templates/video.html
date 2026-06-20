@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Brain Wave - Video</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .video-layout {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 360px;
+      flex-shrink: 0;
+    }
+
+    .video-box,
+    .transcript-box {
+      height: 260px;
+      overflow-y: auto;
+    }
+
+    .video-box iframe {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-md);
+      border: none;
+    }
+
+    .video-box .placeholder,
+    .transcript-box .placeholder {
+      color: var(--muted);
+      text-align: center;
+      margin-top: 5rem;
+    }
+
+    .right-col {
+      flex: 1;
+      min-height: 600px;
+    }
+
+    .url-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .url-form input {
+      flex: 1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .tab-btn {
+      background: #f1eefe;
+      color: var(--purple-dark);
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    .tab-btn.active {
+      background: var(--gradient);
+      color: white;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    #loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem 0;
+    }
+
+    .error {
+      color: #dc2626;
+      margin-bottom: 1rem;
+    }
+
+    /* quiz */
+    .question {
+      margin-bottom: 1.5rem;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .opt-btn {
+      text-align: left;
+      background: #fbfaff;
+      border: 2px solid #e3defc;
+      color: var(--text);
+      padding: 0.6rem 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+    }
+
+    .opt-btn:hover {
+      border-color: var(--purple);
+    }
+
+    .opt-btn.correct {
+      background: #ecfdf5;
+      border-color: #22c55e;
+    }
+
+    .opt-btn.incorrect {
+      background: #fef2f2;
+      border-color: #ef4444;
+    }
+
+    .explanation {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    /* flashcards */
+    .flashcard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .flashcard {
+      background: #fbfaff;
+      border: 2px solid #e3defc;
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      min-height: 110px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .flashcard .back {
+      display: none;
+      color: var(--purple-dark);
+    }
+
+    .flashcard.flipped .front {
+      display: none;
+    }
+
+    .flashcard.flipped .back {
+      display: block;
+    }
+
+    /* mindmap */
+    .mindmap-topic {
+      background: var(--gradient);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 1.25rem;
+    }
+
+    .branch {
+      background: #fbfaff;
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 2px solid #e3defc;
+    }
+
+    .branch h4 {
+      margin: 0 0 0.5rem;
+      color: var(--purple-dark);
+    }
+
+    .branch ul {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    /* exam questions */
+    .exam-q {
+      margin-bottom: 1.5rem;
+    }
+
+    .exam-q .reveal {
+      color: var(--purple-dark);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .exam-q .answer {
+      display: none;
+      margin-top: 0.5rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  {% include "_nav.html" %}
+  <div class="page" style="padding-top: 1rem;">
+
+    {% if not has_key %}
+    <div class="card" style="margin-bottom:1.5rem; border: 2px dashed #c4b5fd;">
+      Add your Gemini API key in <a href="/settings" style="color:#6d28d9; font-weight:600;">Settings</a> before
+      generating content.
+    </div>
+    {% endif %}
+
+    <div class="url-form">
+      <input type="text" id="url" placeholder="Paste a YouTube URL...">
+      <button id="go">Generate</button>
+    </div>
+    <div class="error" id="error"></div>
+
+    <div class="video-layout">
+      <div class="left-col">
+        <div class="card video-box" id="videoBox">
+          <div class="placeholder">Video will appear here</div>
+        </div>
+        <div class="card transcript-box" id="transcriptBox">
+          <div class="placeholder">Transcript will appear here</div>
+        </div>
+      </div>
+
+      <div class="card right-col" id="rightCol">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="summary">Summary</button>
+          <button class="tab-btn" data-tab="quiz">Quiz</button>
+          <button class="tab-btn" data-tab="flashcards">Flashcards</button>
+          <button class="tab-btn" data-tab="mindmap">Mindmap</button>
+          <button class="tab-btn" data-tab="exam">Exam questions</button>
+        </div>
+
+        <div id="loading" style="display:none;">Generating summary, quiz, flashcards, mindmap and exam questions…</div>
+
+        <div class="tab-panel active" id="panel-summary">
+          <p class="muted">Nothing yet - paste a video link above.</p>
+        </div>
+        <div class="tab-panel" id="panel-quiz"></div>
+        <div class="tab-panel" id="panel-flashcards"></div>
+        <div class="tab-panel" id="panel-mindmap"></div>
+        <div class="tab-panel" id="panel-exam"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    document.getElementById('go').addEventListener('click', async () => {
+      const url = document.getElementById('url').value.trim();
+      if (!url) return;
+
+      document.getElementById('error').textContent = '';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('go').disabled = true;
+
+      try {
+        const res = await fetch('/api/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          document.getElementById('error').textContent = data.error || 'Something went wrong.';
+          return;
+        }
+        renderAll(data);
+      } catch (e) {
+        document.getElementById('error').textContent = 'Network error: ' + e.message;
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('go').disabled = false;
+      }
+    });
+
+    function renderAll(data) {
+      document.getElementById('videoBox').innerHTML =
+        `<iframe src="https://www.youtube.com/embed/${data.video_id}" allowfullscreen></iframe>`;
+
+      document.getElementById('transcriptBox').innerHTML =
+        `<div style="font-size:0.9rem; line-height:1.5;">${data.transcript.replace(/</g, '&lt;')}</div>`;
+
+      document.getElementById('panel-summary').innerHTML = data.summary.replace(/\n/g, '<br>');
+
+      const quizEl = document.getElementById('panel-quiz');
+      quizEl.innerHTML = '';
+      (data.quiz || []).forEach((q, qi) => {
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question';
+        qDiv.innerHTML = `<strong>${qi + 1}. ${q.question}</strong>`;
+        const optsDiv = document.createElement('div');
+        optsDiv.className = 'options';
+        q.options.forEach((opt, oi) => {
+          const b = document.createElement('button');
+          b.className = 'opt-btn';
+          b.textContent = opt;
+          b.addEventListener('click', () => {
+            if (b.dataset.locked) return;
+            optsDiv.querySelectorAll('.opt-btn').forEach(x => x.dataset.locked = '1');
+            if (oi === q.correct_index) { b.classList.add('correct'); }
+            else { b.classList.add('incorrect'); optsDiv.children[q.correct_index].classList.add('correct'); }
+            const exp = document.createElement('div');
+            exp.className = 'explanation';
+            exp.textContent = q.explanation || '';
+            qDiv.appendChild(exp);
+          });
+          optsDiv.appendChild(b);
+        });
+        qDiv.appendChild(optsDiv);
+        quizEl.appendChild(qDiv);
+      });
+
+      const fcEl = document.getElementById('panel-flashcards');
+      fcEl.innerHTML = '<div class="flashcard-grid"></div>';
+      const grid = fcEl.querySelector('.flashcard-grid');
+      (data.flashcards || []).forEach(card => {
+        const div = document.createElement('div');
+        div.className = 'flashcard';
+        div.innerHTML = `<div class="front">${card.front}</div><div class="back">${card.back}</div>`;
+        div.addEventListener('click', () => div.classList.toggle('flipped'));
+        grid.appendChild(div);
+      });
+
+      const mmEl = document.getElementById('panel-mindmap');
+      const mm = data.mindmap || {};
+      let mmHtml = `<div class="mindmap-topic">${mm.topic || ''}</div>`;
+      (mm.branches || []).forEach(branch => {
+        mmHtml += `<div class="branch"><h4>${branch.label}</h4><ul>` +
+          (branch.points || []).map(p => `<li>${p}</li>`).join('') + '</ul></div>';
+      });
+      mmEl.innerHTML = mmHtml;
+
+      const examEl = document.getElementById('panel-exam');
+      examEl.innerHTML = '';
+      (data.exam_questions || []).forEach((q, i) => {
+        const div = document.createElement('div');
+        div.className = 'exam-q';
+        div.innerHTML = `<strong>${i + 1}. ${q.question}</strong><div class="reveal">Show model answer</div>
+                      <div class="answer">${q.model_answer}</div>`;
+        div.querySelector('.reveal').addEventListener('click', (e) => {
+          const ans = div.querySelector('.answer');
+          ans.style.display = ans.style.display === 'block' ? 'none' : 'block';
+        });
+        examEl.appendChild(div);
+      });
+    }
+  </script>
+</body>
+
+</html>

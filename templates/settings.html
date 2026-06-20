@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Brain Wave - Settings</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  {% include "_nav.html" %}
+  <div class="page" style="padding-top: 1rem; max-width: 480px;">
+    <div class="card">
+      <h1 style="margin-top:0;">Settings</h1>
+      <p class="muted">Add your own free Gemini API key. Get one at
+        <a href="https://aistudio.google.com/apikey" target="_blank"
+          style="color:#6d28d9; font-weight:600;">aistudio.google.com/apikey</a>.
+      </p>
+      {% if message %}<div style="color:#16a34a; font-weight:600; margin-bottom:1rem;">{{ message }}</div>{% endif %}
+      <form method="POST">
+        <input type="text" name="api_key" placeholder="Your Gemini API key" value="{{ api_key }}">
+        <button type="submit" style="margin-top:1rem;">Save key</button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

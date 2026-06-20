@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Brain Wave - Home</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .tt-preview-day {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      align-items: center;
+      gap: 1rem;
+      background: #fbfaff;
+      border: 2px solid #e3defc;
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .tt-preview-day.exam-day {
+      border-color: var(--purple);
+      background: #f5f0ff;
+    }
+
+    .tt-preview-day .wd {
+      font-weight: 700;
+    }
+
+    .tt-preview-day .d {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .tt-preview-sessions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .session-chip-sm {
+      background: var(--gradient);
+      color: white;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .session-chip-sm .time {
+      opacity: 0.85;
+      font-weight: 500;
+      margin-right: 0.3rem;
+    }
+
+    .exam-chip-sm {
+      background: white;
+      color: var(--purple-dark);
+      border: 2px solid var(--purple);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .next-exam-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: var(--gradient);
+      color: white;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .next-exam-banner .label {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .next-exam-banner .subj {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .tt-card-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .tt-card-actions .btn-secondary {
+      background: #f1eefe;
+      color: var(--purple-dark);
+    }
+  </style>
+</head>
+
+<body>
+  {% include "_nav.html" %}
+  <div class="page" style="padding-top: 1rem;">
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h1 style="margin-top:0;">Welcome back, {{ username }}</h1>
+      <div style="display:flex; align-items:center; gap:0.75rem; font-size:1.1rem;">
+        🔥 <strong>{{ streak }}-day streak</strong>
+        <span class="muted">- keep it going!</span>
+      </div>
+    </div>
+
+    {% if not has_key %}
+    <div class="card" style="margin-bottom:1.5rem; border: 2px dashed #c4b5fd;">
+      <strong>You haven't added a Gemini API key yet.</strong>
+      <p class="muted" style="margin-bottom:0;">Go to Settings to add your free key so you can start summarizing videos.
+      </p>
+      <a class="btn" href="/settings" style="display:inline-block; margin-top:0.75rem;">Go to Settings</a>
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h2 style="margin-top:0;">Your revision timetable</h2>
+
+      {% if has_timetable %}
+      {% if next_exam %}
+      <div class="next-exam-banner">
+        <div>
+          <div class="label">Next exam</div>
+          <div class="subj">{{ next_exam.subject }}{% if next_exam.time %} · {{ next_exam.time }}{% endif %}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="label">
+            {% if next_exam.days_left == 0 %}Today{% elif next_exam.days_left == 1 %}Tomorrow{% else %}In {{
+            next_exam.days_left }} days{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if upcoming_days %}
+      <p class="muted" style="margin-top:0;">Coming up:</p>
+      {% for day in upcoming_days %}
+      <div class="tt-preview-day{% if day.exam_today %} exam-day{% endif %}">
+        <div>
+          <div class="wd">{{ day.weekday }}</div>
+          <div class="d">{{ day.date }}</div>
+        </div>
+        <div class="tt-preview-sessions">
+          {% for s in day.sessions %}
+          {% if s is mapping %}
+          <div class="session-chip-sm"><span class="time">{{ s.start }}–{{ s.end }}</span>{{ s.subject }}</div>
+          {% else %}
+          <div class="session-chip-sm">{{ s }}</div>
+          {% endif %}
+          {% endfor %}
+          {% for s in day.exam_today %}
+          <div class="exam-chip-sm">Exam: {{ s }}</div>
+          {% endfor %}
+          {% if not day.sessions and not day.exam_today %}
+          <span class="muted">Rest day</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="muted">No exams left to revise for - nice work!</p>
+      {% endif %}
+
+      <div class="tt-card-actions">
+        <a class="btn" href="/exams">View full timetable →</a>
+        <a class="btn-secondary btn" href="/api/download-timetable.ics">⬇ Download calendar (.ics)</a>
+      </div>
+      {% else %}
+      <p class="muted">Upload a photo of your exam timetable and we'll build you a personalised revision schedule
+        with proper timings, saved here on your home page.</p>
+      <a class="btn" href="/exams" style="display:inline-block;">Build my timetable →</a>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Ready to study a video?</h2>
+      <p class="muted">Head to the Video tab in the sidebar, paste a YouTube link, and get a summary, quiz, flashcards,
+        mindmap and exam questions - all in one go.</p>
+      <a class="btn" href="/video" style="display:inline-block;">Go to Video tool →</a>
+    </div>
+  </div>
+</body>
+
+</html>

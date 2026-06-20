@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+:root {
+  --purple: #8b5cf6;
+  --purple-dark: #6d28d9;
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+  --bg: #f4f3ff;
+  --card: #ffffff;
+  --text: #2e1065;
+  --muted: #7c7a9c;
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --gradient: linear-gradient(135deg, var(--purple), var(--blue));
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+}
+
+a {
+  color: inherit;
+}
+
+.topbar {
+  position: relative;
+  height: 110px;
+  background: var(--gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /*border-radius: 0 0 var(--radius-lg) var(--radius-lg);*/
+  margin-bottom: 1.5rem;
+}
+
+.topbar .brand {
+  position: relative;
+  z-index: 2;
+  color: white;
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar svg.wave {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0.35;
+}
+
+.topbar svg.wave.wave1 {
+  top: 10px;
+}
+
+.topbar svg.wave.wave2 {
+  top: 45px;
+  opacity: 0.2;
+}
+
+.sidebar {
+  position: fixed;
+  top: 130px;
+  left: 16px;
+  width: 76px;
+  background: var(--gradient);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem 0;
+  box-shadow: 0 10px 30px rgba(109, 40, 217, 0.25);
+  z-index: 10;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  color: white;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+
+.sidebar a.active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar svg {
+  width: 24px;
+  height: 24px;
+}
+
+.page {
+  margin-left: 112px;
+  padding: 0 2rem 3rem 1.5rem;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 6px 24px rgba(109, 40, 217, 0.08);
+  padding: 1.75rem;
+}
+
+button,
+.btn {
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--gradient);
+  color: white;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+button:hover,
+.btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+input[type=text],
+input[type=password],
+input[type=url] {
+  font-family: inherit;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid #e3defc;
+  background: #fbfaff;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.auth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--gradient);
+}
+
+.auth-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  width: 360px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.auth-card h1 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.auth-card input {
+  margin-bottom: 1rem;
+}
+
+.auth-card .error {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.auth-card .switch {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.auth-card .switch a {
+  color: var(--purple-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
