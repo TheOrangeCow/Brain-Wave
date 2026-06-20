@@ -17,7 +17,7 @@ app.secret_key = os.environ.get("SECRET_KEY")
 CODE_SECRET  = os.getenv("CODE_SECRET")
 
 COW_ACCOUNTS = "https://theorangecow.org"
-COW_CLIENT_ID = "brainwave"
+COW_CLIENT_ID = "brain-wave"
 COW_CLIENT_SECRET = "dev-secret-brainwave" #os.getenv("COW_CLIENT_SECRET")
 COW_REDIRECT_URI = "https://brainwave.theorangecow.org/cow/callback"
 
