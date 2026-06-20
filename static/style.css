@@ -175,7 +175,7 @@ button:disabled {
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease;
   border: 2px solid #ff5e1a;
-  background-color: #1a0a02 !important;
+  background: #1a0a02 !important;
   color: #ff5e1a;
 }
 
