@@ -7,10 +7,19 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from youtube_transcript_api import YouTubeTranscriptApi
 from google import genai
 from google.genai import types
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 CODE_SECRET  = os.getenv("CODE_SECRET")
+
+COW_ACCOUNTS = "https://theorangecow.org"
+COW_CLIENT_ID = "brainwave"
+COW_CLIENT_SECRET = "dev-secret-brainwave" #os.getenv("COW_CLIENT_SECRET")
+COW_REDIRECT_URI = "https://brainwave.theorangecow.org/cow/callback"
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "brainwave.db")
 MODEL = "gemini-2.5-flash"
@@ -143,6 +152,76 @@ def login():
 
     return render_template("login.html")
 
+@app.route("/cow/login")
+def cow_login():
+    return redirect(
+        f"{COW_ACCOUNTS}/sso/authorize"
+        f"?client_id={COW_CLIENT_ID}"
+        f"&redirect_uri={COW_REDIRECT_URI}"
+    )
+@app.route("/cow/callback")
+def cow_callback():
+    token = request.args.get("token")
+
+    if not token:
+        return redirect(url_for("login"))
+
+    try:
+        resp = requests.post(
+            f"{COW_ACCOUNTS}/sso/verify",
+            json={
+                "client_id": COW_CLIENT_ID,
+                "client_secret": COW_CLIENT_SECRET,
+                "token": token,
+            },
+            timeout=10,
+        )
+
+        result = resp.json()
+
+    except Exception:
+        return render_template(
+            "login.html",
+            error="Could not connect to Cow Accounts."
+        )
+
+    if resp.status_code != 200 or not result.get("ok"):
+        return render_template(
+            "login.html",
+            error="Cow sign-in failed."
+        )
+
+    username = result["username"]
+
+    conn = get_db()
+
+    user = conn.execute(
+        "SELECT * FROM users WHERE username=?",
+        (username,)
+    ).fetchone()
+
+    if not user:
+        conn.execute(
+            """
+            INSERT INTO users
+            (username, password_hash)
+            VALUES (?, ?)
+            """,
+            (username, "")
+        )
+
+        conn.commit()
+
+        user = conn.execute(
+            "SELECT * FROM users WHERE username=?",
+            (username,)
+        ).fetchone()
+
+    session["user_id"] = user["id"]
+
+    conn.close()
+
+    return redirect(url_for("home"))
 
 @app.route("/logout")
 def logout():
