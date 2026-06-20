@@ -5,3 +5,4 @@ google-genai==2.9.0
 gunicorn==26.0.0
 gevent==26.5.0
 requests
+dotenv
