@@ -48,9 +48,9 @@ a {
 }
 
 .btn-primary {
-  font-family: var(--mono);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   font-size: 0.88rem;
-  background: var(--orange);
+  background: #ff5e1a;
   color: #1a0a02;
   padding: 13px 22px;
   border-radius: 7px;
@@ -61,7 +61,7 @@ a {
 }
 
 .btn-primary:hover {
-  background: var(--orange-soft);
+  background: #ffb088;
   transform: translateY(-1px);
 }
 
