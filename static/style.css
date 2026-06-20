@@ -47,6 +47,28 @@ a {
   color: inherit;
 }
 
+.btn-primary {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  background: var(--orange);
+  color: #1a0a02;
+  padding: 13px 22px;
+  border-radius: 7px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background .15s ease, transform .15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--orange-soft);
+  transform: translateY(-1px);
+}
+
+.btn-primary.full {
+  width: 100%;
+}
+
 .topbar {
   position: relative;
   height: 110px;
