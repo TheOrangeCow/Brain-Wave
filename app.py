@@ -192,6 +192,7 @@ def home():
         upcoming_days=upcoming_days,
         next_exam=next_exam,
         timetable_updated=timetable_updated,
+        joincode=get_join_code(),
     )
 
 
