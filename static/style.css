@@ -47,29 +47,6 @@ a {
   color: inherit;
 }
 
-.btn-primary {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.88rem;
-  background: #1a0a02;
-  color: #ff5e1a;
-  padding: 13px 22px;
-  border-radius: 7px;
-  font-weight: 600;
-  border: 2px solid #ff5e1a;
-  cursor: pointer;
-  transition: background .15s ease, transform .15s ease;
-  align-self: center;
-}
-
-.btn-primary:hover {
-  background: #ffb088;
-  color: #1a0a02;
-  transform: translateY(-1px);
-}
-
-.btn-primary.full {
-  width: 100%;
-}
 
 .topbar {
   position: relative;
