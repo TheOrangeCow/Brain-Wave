@@ -168,9 +168,20 @@ button:disabled {
 }
 
 .cowbut{
+  font-family: inherit;
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
   border: 2px solid #ff5e1a;
   background-color: #1a0a02 !important;
   color: #ff5e1a;
+}
+
+.cowbut:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
 }
 
 input[type=text],
