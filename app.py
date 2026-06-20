@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import hashlib
 import sqlite3
 from datetime import date, timedelta, datetime
 from functools import wraps
@@ -13,6 +14,7 @@ from google.genai import types
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+CODE_SECRET  = os.getenv("CODE_SECRET")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "brainwave.db")
 MODEL = "gemini-2.5-flash"
@@ -24,6 +26,10 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_join_code():
+    hour_bucket = int(time.time()) // 3600
+    raw = hmac.new(CODE_SECRET.encode(), str(hour_bucket).encode(), hashlib.sha256).hexdigest()
+    return raw[:6].upper()
 
 def init_db():
     conn = get_db()
@@ -95,10 +101,14 @@ def signup():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
+        joincode = request.form.get("joincode", "")
         api_key = request.form.get("api_key", "").strip()
 
         if not username or not password:
             return render_template("signup.html", error="Username and password are required.")
+
+        if joincode != get_join_code():
+            return render_template("signup.html", error="Invalid join code.")
 
         conn = get_db()
         existing = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
