@@ -169,7 +169,7 @@ button:disabled {
 
 .cowbut{
   border: 2px solid #ff5e1a;
-  background-color: #1a0a02;
+  background-color: #1a0a02 !important;
   color: #ff5e1a;
 }
 
