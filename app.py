@@ -109,6 +109,9 @@ def signup():
         joincode = request.form.get("joincode", "")
         api_key = request.form.get("api_key", "").strip()
 
+        if username.endswith("_cow"):
+            return render_template("signup.html", error="Invalid username.")
+            
         if not username or not password:
             return render_template("signup.html", error="Username and password are required.")
 
@@ -191,7 +194,7 @@ def cow_callback():
             error="Cow sign-in failed."
         )
 
-    username = result["username"]
+    username = result["username"] + "_cow"
 
     conn = get_db()
 
