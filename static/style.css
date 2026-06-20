@@ -58,6 +58,7 @@ a {
   border: 2px solid #ff5e1a;
   cursor: pointer;
   transition: background .15s ease, transform .15s ease;
+  align-self: center;
 }
 
 .btn-primary:hover {
