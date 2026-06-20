@@ -167,6 +167,12 @@ button:disabled {
   transform: none;
 }
 
+.cowbut{
+  border: 2px solid #ff5e1a;
+  background-color: #1a0a02;
+  color: #ff5e1a;
+}
+
 input[type=text],
 input[type=password],
 input[type=url] {
