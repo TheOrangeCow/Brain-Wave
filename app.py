@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+app.secret_key = os.environ.get("SECRET_KEY")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "brainwave.db")
 MODEL = "gemini-2.5-flash"
