@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Brain Wave - Solve</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icon.ico') }}">
+    <style>
+        .solve-layout {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .upload-col {
+            width: 380px;
+            flex-shrink: 0;
+        }
+
+        .drop-zone {
+            border: 2px dashed #c4b5fd;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--muted);
+            cursor: pointer;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--purple);
+            background: #fbfaff;
+        }
+
+        .drop-zone img {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: var(--radius-sm);
+        }
+
+        .drop-zone .hint {
+            font-size: 0.85rem;
+        }
+
+        .drop-zone .hint kbd {
+            background: #f1eefe;
+            border-radius: 4px;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .solve-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .solve-actions button {
+            flex: 1;
+        }
+
+        .right-col {
+            flex: 1;
+            min-height: 400px;
+        }
+
+        #loading {
+            text-align: center;
+            color: var(--muted);
+            padding: 3rem 0;
+        }
+
+        .error {
+            color: #dc2626;
+            margin-bottom: 1rem;
+        }
+
+        .status-banner {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        .status-banner.correct {
+            background: #ecfdf5;
+            color: #15803d;
+            border: 2px solid #22c55e;
+        }
+
+        .status-banner.errors {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 2px solid #ef4444;
+        }
+
+        .status-banner.fresh {
+            background: #f1eefe;
+            color: var(--purple-dark);
+            border: 2px solid #c4b5fd;
+        }
+
+        .section-title {
+            color: var(--purple-dark);
+            font-weight: 700;
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        .error-card {
+            background: #fff7f7;
+            border: 2px solid #fca5a5;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-card .loc {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #b91c1c;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .error-card .label {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .error-card .correction {
+            margin-top: 0.5rem;
+            color: #15803d;
+        }
+
+        .solution-box,
+        .attempt-box,
+        .question-box {
+            background: #fbfaff;
+            border: 2px solid #e3defc;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.55;
+        }
+
+        .final-answer {
+            background: var(--gradient);
+            color: white;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    {% include "_nav.html" %}
+    <div class="page" style="padding-top: 1rem;">
+
+        {% if not has_key %}
+        <div class="card" style="margin-bottom:1.5rem; border: 2px dashed #c4b5fd;">
+            Add your Gemini API key in <a href="/settings" style="color:#6d28d9; font-weight:600;">Settings</a> before
+            solving questions.
+        </div>
+        {% endif %}
+
+        <div class="solve-layout">
+            <div class="upload-col">
+                <div class="card">
+                    <div class="drop-zone" id="dropZone" tabindex="0">
+                        <div id="dropContent">
+                            <strong>Click to upload, drag a file, or paste an image</strong>
+                            <div class="hint">Paste with <kbd>Ctrl</kbd> + <kbd>V</kbd> after clicking here</div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" style="display:none;">
+                    <div class="solve-actions">
+                        <button id="clearBtn" style="background:#f1eefe; color:var(--purple-dark);">Clear</button>
+                        <button id="solveBtn">Check / Solve</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card right-col" id="rightCol">
+                <div class="error" id="error"></div>
+                <div id="loading" style="display:none;">Reading the question and working through it…</div>
+                <div id="resultArea">
+                    <p class="muted">Upload or paste a photo of a question to get started. If you've already attempted
+                        it,
+                        Brain Wave will mark your working and show you exactly where it went wrong. If you haven't
+                        started,
+                        it'll just solve it for you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const dropContent = document.getElementById('dropContent');
+        const fileInput = document.getElementById('fileInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const solveBtn = document.getElementById('solveBtn');
+        const errorEl = document.getElementById('error');
+        const loadingEl = document.getElementById('loading');
+        const resultArea = document.getElementById('resultArea');
+
+        let currentBlob = null;
+
+        function showImage(blob) {
+            currentBlob = blob;
+            const url = URL.createObjectURL(blob);
+            dropContent.innerHTML = `<img src="${url}" alt="question preview">`;
+        }
+
+        function resetDrop() {
+            currentBlob = null;
+            dropContent.innerHTML = `<strong>Click to upload, drag a file, or paste an image</strong>
+        <div class="hint">Paste with <kbd>Ctrl</kbd> + <kbd>V</kbd> after clicking here</div>`;
+            fileInput.value = '';
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files && fileInput.files[0]) {
+                showImage(fileInput.files[0]);
+            }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                showImage(file);
+            }
+        });
+
+        dropZone.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    const blob = item.getAsFile();
+                    showImage(blob);
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+
+        document.addEventListener('paste', (e) => {
+            if (document.activeElement !== dropZone) return;
+            const items = e.clipboardData.items;
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    showImage(item.getAsFile());
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+
+        clearBtn.addEventListener('click', resetDrop);
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        solveBtn.addEventListener('click', async () => {
+            errorEl.textContent = '';
+            if (!currentBlob) {
+                errorEl.textContent = 'Upload or paste an image first.';
+                return;
+            }
+
+            loadingEl.style.display = 'block';
+            resultArea.innerHTML = '';
+            solveBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('image', currentBlob, 'question.png');
+
+            try {
+                const res = await fetch('/api/solve-question', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errorEl.textContent = data.error || 'Something went wrong.';
+                    return;
+                }
+                renderResult(data);
+            } catch (e) {
+                errorEl.textContent = 'Network error: ' + e.message;
+            } finally {
+                loadingEl.style.display = 'none';
+                solveBtn.disabled = false;
+            }
+        });
+
+        function renderResult(data) {
+            let html = '';
+
+            if (data.has_attempt) {
+                if (data.is_fully_correct) {
+                    html += `<div class="status-banner correct">Nice work — your attempt is fully correct!</div>`;
+                } else {
+                    const count = (data.errors || []).length;
+                    html += `<div class="status-banner errors">Found ${count} thing${count === 1 ? '' : 's'} to fix in your attempt</div>`;
+                }
+            } else {
+                html += `<div class="status-banner fresh">No attempt detected — here's the full solution</div>`;
+            }
+
+            html += `<div class="section-title">Question</div>
+                <div class="question-box">${escapeHtml(data.question_text || '')}</div>`;
+
+            if (data.has_attempt) {
+                html += `<div class="section-title">Your attempt</div>
+                  <div class="attempt-box">${escapeHtml(data.attempt_text || '')}</div>`;
+            }
+
+            if (data.errors && data.errors.length) {
+                html += `<div class="section-title">Where it went wrong</div>`;
+                data.errors.forEach(err => {
+                    html += `<div class="error-card">
+                      <div class="loc">${escapeHtml(err.location || '')}</div>
+                      <div class="label">What you did:</div> ${escapeHtml(err.what_they_did || '')}
+                      <div class="label" style="margin-top:0.5rem;">Why it's wrong:</div> ${escapeHtml(err.why_its_wrong || '')}
+                      <div class="correction"><strong>Correction:</strong> ${escapeHtml(err.correction || '')}</div>
+                    </div>`;
+                });
+            }
+
+            html += `<div class="section-title">Full solution</div>
+                <div class="solution-box">${escapeHtml(data.full_solution || '')}</div>`;
+
+            if (data.final_answer) {
+                html += `<div class="final-answer">Final answer: ${escapeHtml(data.final_answer)}</div>`;
+            }
+
+            resultArea.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>

@@ -669,5 +669,82 @@ def process():
     return jsonify(result)
 
 
+@app.route("/solve")
+@login_required
+def solve_page():
+    user = current_user()
+    return render_template("solve.html", username=user["username"], has_key=bool(user["api_key"]))
+
+
+SOLVE_PROMPT = """You are looking at an image of a homework or exam question, possibly with a
+student's handwritten or typed attempt at answering it.
+
+Respond ONLY with a single valid JSON object (no markdown fences, no preamble) in this exact shape:
+
+{
+  "question_text": "the question as written in the image, transcribed as accurately as possible",
+  "has_attempt": true or false,
+  "attempt_text": "a transcription of the student's attempt if one exists, otherwise empty string",
+  "is_fully_correct": true or false (only meaningful if has_attempt is true),
+  "errors": [
+    {
+      "location": "which step, line, or part of the attempt this refers to",
+      "what_they_did": "what the student wrote or did at that point",
+      "why_its_wrong": "a clear, kind explanation of the mistake",
+      "correction": "what should have been done instead"
+    }
+  ],
+  "full_solution": "a complete, clearly laid-out step-by-step solution to the question, from scratch, in the student's own working style where reasonable",
+  "final_answer": "just the final answer, concisely"
+}
+
+Rules:
+- If there is no visible attempt at all (has_attempt is false), leave "attempt_text", "errors", and
+  "is_fully_correct" as empty/false and just provide "full_solution" and "final_answer".
+- If there IS an attempt, set has_attempt to true, transcribe it into "attempt_text", and carefully check
+  every step against correct working. List every distinct error you find in "errors", even small ones.
+  If the attempt is fully correct, set "is_fully_correct" to true and leave "errors" as an empty list,
+  but still provide "full_solution" for reference.
+- Be specific and pinpoint exactly where things went wrong rather than giving vague feedback.
+- If the image is unreadable or doesn't contain a recognisable question, say so honestly inside
+  "question_text" and leave the rest empty/false.
+"""
+
+
+def solve_question_from_image(api_key, image_bytes, mime_type):
+    client = genai.Client(api_key=api_key)
+    image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+    resp = client.models.generate_content(
+        model=MODEL,
+        contents=[SOLVE_PROMPT, image_part],
+    )
+    raw = resp.text.strip()
+    raw = re.sub(r"^```json|```$", "", raw, flags=re.MULTILINE).strip()
+    return json.loads(raw)
+
+
+@app.route("/api/solve-question", methods=["POST"])
+@login_required
+def solve_question():
+    user = current_user()
+    if not user["api_key"]:
+        return jsonify({"error": "Add your Gemini API key in Settings first."}), 400
+
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded."}), 400
+
+    file = request.files["image"]
+    image_bytes = file.read()
+    if not image_bytes:
+        return jsonify({"error": "Empty image."}), 400
+    mime_type = file.mimetype or "image/png"
+
+    try:
+        result = solve_question_from_image(user["api_key"], image_bytes, mime_type)
+    except Exception as e:
+        return jsonify({"error": f"Could not process the question image: {e}"}), 500
+
+    return jsonify(result)
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
