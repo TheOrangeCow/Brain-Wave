@@ -1,64 +1,64 @@
 <div class="topbar">
-  <svg class="wave wave1" viewBox="0 0 1200 60" preserveAspectRatio="none">
-    <path d="M0,30 Q150,0 300,30 T600,30 T900,30 T1200,30" stroke="white" stroke-width="4" fill="none" />
-  </svg>
-  <svg class="wave wave2" viewBox="0 0 1200 60" preserveAspectRatio="none">
-    <path d="M0,40 Q150,10 300,40 T600,40 T900,40 T1200,40" stroke="white" stroke-width="4" fill="none" />
-  </svg>
-  <div class="brand">Brain Wave</div>
+    <svg class="wave wave1" viewBox="0 0 1200 60" preserveAspectRatio="none">
+        <path d="M0,30 Q150,0 300,30 T600,30 T900,30 T1200,30" stroke="white" stroke-width="4" fill="none" />
+    </svg>
+    <svg class="wave wave2" viewBox="0 0 1200 60" preserveAspectRatio="none">
+        <path d="M0,40 Q150,10 300,40 T600,40 T900,40 T1200,40" stroke="white" stroke-width="4" fill="none" />
+    </svg>
+    <div class="brand">Brain Wave</div>
 </div>
 
 <div class="sidebar">
-  <a href="/" class="{{ 'active' if active == 'home' else '' }}" title="Home">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <path d="M3 11l9-8 9 8" />
-      <path d="M5 10v10h14V10" />
-    </svg>
-  </a>
-  <a href="/video" class="{{ 'active' if active == 'video' else '' }}" title="Video">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <rect x="3" y="5" width="14" height="14" rx="3" />
-      <path d="M17 9l4-3v12l-4-3" />
-    </svg>
-  </a>
-  <a href="/exams" class="{{ 'active' if active == 'exams' else '' }}" title="Exam Timetable">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <rect x="3" y="4" width="18" height="17" rx="3" />
-      <path d="M3 9h18" />
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <path d="M8 13h2" />
-      <path d="M14 13h2" />
-      <path d="M8 17h2" />
-      <path d="M14 17h2" />
-    </svg>
-  </a>
-  <a href="/solve" class="{{ 'active' if active == 'solve' else '' }}" title="Solve a Question">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-      <path d="M14 3v6h6" />
-      <path d="M8 13h4" />
-      <path d="M16.5 14.5a1.5 1.5 0 1 1 2 2L14 21l-3 1 1-3z" />
-    </svg>
-  </a>
-  <a href="/settings" class="{{ 'active' if active == 'settings' else '' }}" title="Settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path
-        d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z" />
-    </svg>
-  </a>
-  <a href="/logout" title="Log out">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <path d="M16 17l5-5-5-5" />
-      <path d="M21 12H9" />
-    </svg>
-  </a>
+    <a href="/" class="{{ 'active' if active == 'home' else '' }}" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M3 11l9-8 9 8" />
+            <path d="M5 10v10h14V10" />
+        </svg>
+    </a>
+    <a href="/video" class="{{ 'active' if active == 'video' else '' }}" title="Video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="5" width="14" height="14" rx="3" />
+            <path d="M17 9l4-3v12l-4-3" />
+        </svg>
+    </a>
+    <a href="/exams" class="{{ 'active' if active == 'exams' else '' }}" title="Exam Timetable">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="17" rx="3" />
+            <path d="M3 9h18" />
+            <path d="M8 2v4" />
+            <path d="M16 2v4" />
+            <path d="M8 13h2" />
+            <path d="M14 13h2" />
+            <path d="M8 17h2" />
+            <path d="M14 17h2" />
+        </svg>
+    </a>
+    <a href="/solve" class="{{ 'active' if active == 'solve' else '' }}" title="Solve a Question">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+            <path d="M14 3v6h6" />
+            <path d="M8 13h4" />
+            <path d="M16.5 14.5a1.5 1.5 0 1 1 2 2L14 21l-3 1 1-3z" />
+        </svg>
+    </a>
+    <a href="/settings" class="{{ 'active' if active == 'settings' else '' }}" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+                d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z" />
+        </svg>
+    </a>
+    <a href="/logout" title="Log out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5" />
+            <path d="M21 12H9" />
+        </svg>
+    </a>
 </div>
